@@ -16,7 +16,7 @@ func NewProduct(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	d, err := json.Marshal(data.ProductList)
+	d, err := json.Marshal(data.GetProducts())
 
 	if err != nil {
 		http.Error(rw, "Error getting products", http.StatusInternalServerError)
