@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"product-api/handlers"
 	"time"
+
+	"github.com/alwesleys/product-api/handlers"
 )
 
 func main() {

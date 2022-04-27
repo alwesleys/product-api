@@ -4,9 +4,10 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"product-api/data"
 	"regexp"
 	"strconv"
+
+	"github.com/alwesleys/product-api/data"
 )
 
 type Products struct {
