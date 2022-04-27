@@ -19,6 +19,13 @@ func NewProduct(l *log.Logger) *Products {
 
 func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet { // GET
+		id, _ := getIDFromURI(r.URL.Path)
+
+		if id != -1 { // GET by ID
+			p.getProductById(id, rw, r)
+			return
+		}
+
 		p.getProducts(rw, r)
 		return
 	} else if r.Method == http.MethodPost { // POST
@@ -71,6 +78,24 @@ func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(rw, "Error getting products", http.StatusInternalServerError)
+		return
+	}
+}
+
+// GET specific product
+func (p *Products) getProductById(id int, rw http.ResponseWriter, r *http.Request) {
+	p.l.Println("GET Product by ID")
+	lp, err := data.GetProductByID(id)
+
+	if err != nil {
+		http.Error(rw, "Product not found", http.StatusBadRequest)
+		return
+	}
+
+	err = lp.ToJSON(rw)
+
+	if err != nil {
+		http.Error(rw, "Error getting product", http.StatusInternalServerError)
 		return
 	}
 }

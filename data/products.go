@@ -33,6 +33,11 @@ func (p *Products) ToJSON(w io.Writer) error {
 	return e.Encode(p)
 }
 
+func (p *Product) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(p)
+}
+
 func GetProducts() Products {
 	return productList
 }
@@ -56,6 +61,15 @@ func UpdateProduct(id int, p *Product) error {
 }
 
 var ErrProductNotFound = fmt.Errorf("Product not found")
+
+func GetProductByID(id int) (*Product, error) {
+	pos, err := findProduct(id)
+
+	if err != nil {
+		return nil, err
+	}
+	return productList[pos], nil
+}
 
 func findProduct(id int) (int, error) {
 	for i, p := range productList {
