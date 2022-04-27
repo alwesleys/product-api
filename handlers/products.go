@@ -15,9 +15,11 @@ func NewProduct(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+	if r.Method == http.MethodGet { // GET
 		p.getProducts(rw, r)
 		return
+	} else if r.Method == http.MethodPost { // POST
+		p.addProduct(rw, r)
 	}
 
 	rw.WriteHeader(http.StatusMethodNotAllowed)
@@ -32,4 +34,16 @@ func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(rw, "Error getting products", http.StatusInternalServerError)
 	}
+}
+
+// POST add new product
+func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
+
+	var newP data.Product
+	err := newP.FromJSON(r.Body)
+	if err != nil {
+		http.Error(rw, "Unable to decode json", http.StatusBadRequest)
+	}
+
+	data.AddProduct(&newP)
 }
