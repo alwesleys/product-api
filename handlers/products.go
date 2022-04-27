@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"product-api/data"
@@ -16,11 +15,21 @@ func NewProduct(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	d, err := json.Marshal(data.GetProducts())
+	if r.Method == http.MethodGet {
+		p.getProducts(rw, r)
+		return
+	}
+
+	rw.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// GET all products
+func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
+	lp := data.GetProducts()
+
+	err := lp.ToJSON(rw)
 
 	if err != nil {
 		http.Error(rw, "Error getting products", http.StatusInternalServerError)
 	}
-
-	rw.Write(d)
 }
