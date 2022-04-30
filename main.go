@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/alwesleys/product-api/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -19,8 +20,18 @@ func main() {
 
 	// create new serve mux
 	// bind handlers
-	sm := http.NewServeMux()
-	sm.Handle("/", ph)
+	// sm := http.NewServeMux()
+	sm := mux.NewRouter()
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", ph.GetProducts)
+	// sm.Handle("/products", ph)
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", ph.AddProduct)
 
 	// create new server
 	s := http.Server{

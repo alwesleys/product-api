@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/alwesleys/product-api/data"
+	"github.com/gorilla/mux"
 )
 
 type Products struct {
@@ -16,36 +17,6 @@ type Products struct {
 
 func NewProduct(l *log.Logger) *Products {
 	return &Products{l}
-}
-
-func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet { // GET
-		id, _ := getIDFromURI(r.URL.Path)
-
-		if id != -1 { // GET by ID
-			p.getProductById(id, rw, r)
-			return
-		}
-
-		p.getProducts(rw, r)
-		return
-	} else if r.Method == http.MethodPost { // POST
-		p.addProduct(rw, r)
-		return
-	} else if r.Method == http.MethodPut { // PUT
-		// regex to get id from url
-		id, err := getIDFromURI(r.URL.Path)
-
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		p.updateProduct(id, rw, r)
-		return
-	}
-
-	rw.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 // get ID from URI
@@ -71,7 +42,7 @@ func getIDFromURI(path string) (int, error) {
 }
 
 // GET all products
-func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
+func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("GET Products")
 	lp := data.GetProducts()
 
@@ -102,7 +73,7 @@ func (p *Products) getProductById(id int, rw http.ResponseWriter, r *http.Reques
 }
 
 // POST add new product
-func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
+func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("POST: Add Product")
 	prod := &data.Product{}
 	err := prod.FromJSON(r.Body)
@@ -115,10 +86,18 @@ func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
 }
 
 // PUT update product
-func (p *Products) updateProduct(id int, rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("PUT: Update Product")
+func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		http.Error(rw, "Unable to convert id", http.StatusBadRequest)
+		return
+	}
+
+	p.l.Println("PUT: Update Product ", id)
 	prod := &data.Product{}
-	err := prod.FromJSON(r.Body)
+	err = prod.FromJSON(r.Body)
 	if err != nil {
 		http.Error(rw, "Unable to decode json", http.StatusBadRequest)
 		return
