@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"errors"
+	"context"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/alwesleys/product-api/data"
@@ -17,28 +16,6 @@ type Products struct {
 
 func NewProduct(l *log.Logger) *Products {
 	return &Products{l}
-}
-
-// get ID from URI
-func getIDFromURI(path string) (int, error) {
-	regex := regexp.MustCompile(`/([0-9]+)`)
-	g := regex.FindAllStringSubmatch(path, -1)
-
-	if len(g) != 1 {
-		return -1, errors.New("invalid uri")
-	}
-
-	//g[0] = [/id id]
-	//g[0][1] = id
-	idString := g[0][1]
-
-	id, err := strconv.Atoi(idString)
-
-	if err != nil {
-		return -1, errors.New("invalid uri")
-	}
-
-	return id, nil
 }
 
 // GET all products
@@ -55,8 +32,17 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GET specific product
-func (p *Products) getProductById(id int, rw http.ResponseWriter, r *http.Request) {
+func (p *Products) GetProductById(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("GET Product by ID")
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		http.Error(rw, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
 	lp, err := data.GetProductByID(id)
 
 	if err != nil {
@@ -75,13 +61,8 @@ func (p *Products) getProductById(id int, rw http.ResponseWriter, r *http.Reques
 // POST add new product
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("POST: Add Product")
-	prod := &data.Product{}
-	err := prod.FromJSON(r.Body)
-	if err != nil {
-		http.Error(rw, "Unable to decode json", http.StatusBadRequest)
-		return
-	}
 
+	prod := r.Context().Value(KeyProduct{}).(*data.Product)
 	data.AddProduct(prod)
 }
 
@@ -96,12 +77,8 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	p.l.Println("PUT: Update Product ", id)
-	prod := &data.Product{}
-	err = prod.FromJSON(r.Body)
-	if err != nil {
-		http.Error(rw, "Unable to decode json", http.StatusBadRequest)
-		return
-	}
+
+	prod := r.Context().Value(KeyProduct{}).(*data.Product)
 
 	err = data.UpdateProduct(id, prod)
 	if err == data.ErrProductNotFound {
@@ -111,4 +88,23 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Product not found", http.StatusInternalServerError)
 		return
 	}
+}
+
+type KeyProduct struct {
+}
+
+func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		prod := &data.Product{}
+		err := prod.FromJSON(r.Body)
+		if err != nil {
+			http.Error(rw, "Unable to decode json", http.StatusBadRequest)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
+		req := r.WithContext(ctx)
+
+		next.ServeHTTP(rw, req)
+	})
 }
