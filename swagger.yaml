@@ -1,0 +1,17 @@
+basePath: /
+consumes:
+- application/json
+host: github.com/alwesleys
+info:
+  description: Documentation for Product API
+  title: of Product API
+  version: 1.0.0
+paths: {}
+produces:
+- application/json
+schemes:
+- http
+securityDefinitions:
+  basic:
+    type: basic
+swagger: "2.0"

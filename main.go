@@ -1,3 +1,23 @@
+// Package classification of Product API
+//
+// Documentation for Product API
+//
+//	Schemes: http
+// 	BasePath: /
+// 	Version: 1.0.0
+//	Host: github.com/alwesleys
+//
+// 	Consumes:
+// 	- application/json
+//
+// 	Produces:
+// 	-application/json
+//
+//    SecurityDefinitions:
+//    basic:
+//      type: basic
+//
+// swagger:meta
 package main
 
 import (
