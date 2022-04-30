@@ -10,8 +10,13 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// structure of the API details
+// Product defines the structure of the API details
+// swagger:model
 type Product struct {
+	// the id for this product
+	//
+	// required: true
+	// min: 1
 	ID          int     `json:"id"`
 	Name        string  `json:"name" validate:"required"`
 	Description string  `json:"description"`

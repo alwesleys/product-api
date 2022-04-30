@@ -8,6 +8,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// swagger:route GET /products products listProducts
+// returns a list of products
+// responses:
+//		200: productsResponseWrapper
+
 // GET all products
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("GET Products")
@@ -20,6 +25,11 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// swagger:route GET /products/{id} products getProduct
+// returns a specific product
+// responses:
+//		200: productResponseWrapper
 
 // GET specific product
 func (p *Products) GetProductById(rw http.ResponseWriter, r *http.Request) {

@@ -44,3 +44,34 @@ func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
 		next.ServeHTTP(rw, req)
 	})
 }
+
+// List of wrappers for swagger documentation
+
+// A list of products returned in a response
+// swagger:response productsResponseWrapper
+type productsResponseWrapper struct {
+	// All products in the system
+	// in:body
+	Body []data.Product
+}
+
+// A specific product returned in a response
+// swagger:response productResponseWrapper
+type productResponseWrapper struct {
+	// Specified product by client
+	// in:body
+	Body data.Product
+}
+
+// swagger:response noContent
+type productsNoContentWrapper struct {
+}
+
+// swagger:parameters deleteProduct
+// swagger:parameters getProduct
+type productIDParamWrapper struct {
+	// The id of the product to get/update/delete from DB
+	// in: path
+	// required: true
+	ID int `json:"id"`
+}

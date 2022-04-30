@@ -1,4 +1,4 @@
-// Package classification of Product API
+// Package classification Product API
 //
 // Documentation for Product API
 //
@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/alwesleys/product-api/handlers"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -40,26 +41,29 @@ func main() {
 
 	// create new serve mux
 	// bind handlers
-	// sm := http.NewServeMux()
 	sm := mux.NewRouter()
 
-	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", ph.GetProducts)
-	// sm.Handle("/products", ph)
+	const root = "/products"
 
-	getByIdRouter := sm.Methods(http.MethodGet).Subrouter()
-	getByIdRouter.HandleFunc("/{id:[0-9]+}", ph.GetProductById)
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc(root, ph.GetProducts)
+	getRouter.HandleFunc(root+"/{id:[0-9]+}", ph.GetProductById)
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	putRouter.HandleFunc(root+"/{id:[0-9]+}", ph.UpdateProduct)
 	putRouter.Use(ph.MiddlewareProductValidation)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/", ph.AddProduct)
+	postRouter.HandleFunc(root, ph.AddProduct)
 	postRouter.Use(ph.MiddlewareProductValidation)
 
 	delRouter := sm.Methods(http.MethodDelete).Subrouter()
-	delRouter.HandleFunc("/{id:[0-9]+}", ph.DeleteProductByID)
+	delRouter.HandleFunc(root+"/{id:[0-9]+}", ph.DeleteProductByID)
+
+	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(opts, nil)
+	getRouter.Handle("/docs", sh)
+	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	// create new server
 	s := http.Server{
