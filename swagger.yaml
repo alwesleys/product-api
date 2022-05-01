@@ -43,9 +43,17 @@ paths:
           $ref: '#/responses/productsResponseWrapper'
       tags:
       - products
+    post:
+      description: adds the product provided
+      operationId: addProduct
+      responses:
+        "200":
+          $ref: '#/responses/noContent'
+      tags:
+      - products
   /products/{id}:
     delete:
-      description: returns a list of products
+      description: deletes the specified product
       operationId: deleteProduct
       parameters:
       - description: The id of the product to get/update/delete from DB
@@ -74,6 +82,14 @@ paths:
       responses:
         "200":
           $ref: '#/responses/productResponseWrapper'
+      tags:
+      - products
+    put:
+      description: update the specific product
+      operationId: updateProduct
+      responses:
+        "200":
+          $ref: '#/responses/noContent'
       tags:
       - products
 produces:
